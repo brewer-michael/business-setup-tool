@@ -385,28 +385,31 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('services').innerHTML = '';
             
-            // Use fetch with mode: 'cors'
-            fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`, {
-                method: 'GET',
-                mode: 'cors',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                initializeServices(data);
+            // Use JSONP for GET requests to avoid CORS
+            const script = document.createElement('script');
+            const callbackName = 'callback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                initializeServices(data || {});
                 document.getElementById('loading').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error loading data:', error);
-                // Initialize with empty data if fetch fails
-                initializeServices();
+                
+                // Clean up
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            script.src = `${SCRIPT_URL}?action=get&code=${currentClient}&callback=${callbackName}`;
+            script.onerror = function() {
+                console.log('New client - initializing empty checklist');
+                initializeServices({});
                 document.getElementById('loading').style.display = 'none';
-                // Don't show error to user on first load - might be a new client
-            });
+                
+                // Clean up
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            document.body.appendChild(script);
         }
         
         function initializeServices(savedData = {}) {
