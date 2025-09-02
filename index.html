@@ -366,6 +366,24 @@
             }
         ];
         
+        // Check for code in URL on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check URL hash first (e.g., #TEST2025)
+            let codeFromUrl = window.location.hash.substring(1);
+            
+            // Also check URL parameters (e.g., ?code=TEST2025)
+            if (!codeFromUrl) {
+                const urlParams = new URLSearchParams(window.location.search);
+                codeFromUrl = urlParams.get('code');
+            }
+            
+            if (codeFromUrl) {
+                // Auto-login with code from URL
+                document.getElementById('accessCode').value = codeFromUrl.toUpperCase();
+                login();
+            }
+        });
+        
         function login() {
             const code = document.getElementById('accessCode').value.trim().toUpperCase();
             if (!code) {
@@ -378,6 +396,9 @@
             document.getElementById('app').style.display = 'block';
             document.getElementById('clientName').textContent = code;
             
+            // Update URL to include the code (without reloading)
+            window.history.replaceState({}, '', '#' + code);
+            
             loadClientData();
         }
         
@@ -385,28 +406,69 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('services').innerHTML = '';
             
-            // Use JSONP for GET requests to avoid CORS
+            // Try fetch first with redirect handling
+            fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`, {
+                method: 'GET',
+                redirect: 'follow', // Follow redirects
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => {
+                // Even if redirected, try to get the text
+                return response.text();
+            })
+            .then(text => {
+                try {
+                    // Try to parse as JSON
+                    const data = JSON.parse(text);
+                    initializeServices(data || {});
+                } catch(e) {
+                    // If not JSON, might be HTML error page
+                    console.log('Could not parse response, trying JSONP fallback');
+                    loadWithJSONP();
+                }
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(error => {
+                console.log('Fetch failed, trying JSONP:', error);
+                // Fallback to JSONP
+                loadWithJSONP();
+            });
+        }
+        
+        function loadWithJSONP() {
+            // JSONP fallback for CORS issues
             const script = document.createElement('script');
             const callbackName = 'callback_' + Date.now();
             
             window[callbackName] = function(data) {
+                console.log('Data received via JSONP:', data);
                 initializeServices(data || {});
                 document.getElementById('loading').style.display = 'none';
                 
                 // Clean up
                 delete window[callbackName];
-                document.body.removeChild(script);
+                if (script.parentNode) {
+                    document.body.removeChild(script);
+                }
             };
             
-            script.src = `${SCRIPT_URL}?action=get&code=${currentClient}&callback=${callbackName}`;
+            // Add timestamp to prevent caching
+            const timestamp = new Date().getTime();
+            script.src = `${SCRIPT_URL}?action=get&code=${currentClient}&callback=${callbackName}&t=${timestamp}`;
+            
             script.onerror = function() {
-                console.log('New client - initializing empty checklist');
+                console.log('JSONP also failed - treating as new client');
                 initializeServices({});
                 document.getElementById('loading').style.display = 'none';
                 
                 // Clean up
                 delete window[callbackName];
-                document.body.removeChild(script);
+                if (script.parentNode) {
+                    document.body.removeChild(script);
+                }
             };
             
             document.body.appendChild(script);
