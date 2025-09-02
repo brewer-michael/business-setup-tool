@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Setup Checklist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .login-screen h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .login-screen p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        .login-screen input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .login-screen button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .login-screen button:hover {
+            background: #45a049;
+        }
+        
+        /* Main App */
+        .app {
+            display: none;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .client-name {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .progress {
+            margin-top: 15px;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: #4CAF50;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s ease;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .service-header input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .service-title {
+            flex-grow: 1;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .service-price {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .service-price.free {
+            background: #e8f5e9;
+            color: #4CAF50;
+        }
+        
+        .service-description {
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 36px;
+            font-size: 14px;
+        }
+        
+        .service-url {
+            padding-left: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .service-url input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .service-button {
+            margin-left: 36px;
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .service-button:hover {
+            background: #1976d2;
+        }
+        
+        .save-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .summary-section {
+            background: #fff3e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-section h2 {
+            color: #f57c00;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .bookmark-list {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .bookmark-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .bookmark-item:last-child {
+            border-bottom: none;
+        }
+        
+        .bookmark-item a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        
+        .bookmark-item a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .service-card {
+                padding: 15px;
+            }
+            
+            .service-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <h1>Business Setup Checklist</h1>
+        <p>Enter your access code to continue</p>
+        <input type="text" id="accessCode" placeholder="Enter your code (e.g., SMITH2024)" autocomplete="off">
+        <button onclick="login()">Access My Checklist</button>
+        <div class="error" id="loginError"></div>
+    </div>
+    
+    <!-- Main App -->
+    <div class="app" id="app">
+        <div class="header">
+            <h1>Business Setup for <span class="client-name" id="clientName"></span></h1>
+            <div class="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error" id="appError"></div>
+        <div class="loading" id="loading">Loading your checklist...</div>
+        
+        <div id="services">
+            <!-- Service cards will be inserted here -->
+        </div>
+        
+        <div class="summary-section">
+            <h2>📱 Your Quick Links</h2>
+            <div class="bookmark-list" id="bookmarkList">
+                <p style="color: #999;">Complete services above to see your links here</p>
+            </div>
+        </div>
+        
+        <div class="save-status" id="saveStatus">✓ Saved</div>
+    </div>
+    
+    <script>
+        // Configuration - UPDATE THIS with your Google Apps Script URL
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        
+        let currentClient = null;
+        let autoSaveTimer = null;
+        
+        // Service definitions
+        const services = [
+            {
+                id: 'lastpass',
+                name: 'LastPass',
+                price: '$3/month',
+                description: 'Saves all your passwords in one secure place',
+                setupUrl: 'https://www.lastpass.com',
+                defaultUrl: 'https://lastpass.com'
+            },
+            {
+                id: 'cloudflare',
+                name: 'Cloudflare',
+                price: 'Free',
+                description: 'Manages your website address (domain)',
+                setupUrl: 'https://dash.cloudflare.com/sign-up',
+                defaultUrl: 'https://dash.cloudflare.com'
+            },
+            {
+                id: 'google_workspace',
+                name: 'Google Workspace',
+                price: '$6/month',
+                description: 'Professional email and documents',
+                setupUrl: 'https://workspace.google.com',
+                defaultUrl: 'https://workspace.google.com'
+            },
+            {
+                id: 'quickbooks',
+                name: 'QuickBooks',
+                price: '$30/month',
+                description: 'Tracks money and handles invoices',
+                setupUrl: 'https://quickbooks.intuit.com',
+                defaultUrl: 'https://quickbooks.intuit.com'
+            },
+            {
+                id: 'square',
+                name: 'Square',
+                price: '2.6% + 10¢',
+                description: 'Accept credit card payments',
+                setupUrl: 'https://squareup.com',
+                defaultUrl: 'https://squareup.com/dashboard'
+            }
+        ];
+        
+        function login() {
+            const code = document.getElementById('accessCode').value.trim().toUpperCase();
+            if (!code) {
+                showError('loginError', 'Please enter your access code');
+                return;
+            }
+            
+            currentClient = code;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('clientName').textContent = code;
+            
+            loadClientData();
+        }
+        
+        function loadClientData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('services').innerHTML = '';
+            
+            // For testing without backend - remove this when you add the Google Apps Script
+            setTimeout(() => {
+                initializeServices();
+                document.getElementById('loading').style.display = 'none';
+            }, 500);
+            
+            /* Uncomment this when you have your Google Apps Script URL
+            fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`)
+                .then(response => response.json())
+                .then(data => {
+                    initializeServices(data);
+                    document.getElementById('loading').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                    initializeServices();
+                    document.getElementById('loading').style.display = 'none';
+                });
+            */
+        }
+        
+        function initializeServices(savedData = {}) {
+            const servicesDiv = document.getElementById('services');
+            servicesDiv.innerHTML = '';
+            
+            services.forEach(service => {
+                const isChecked = savedData[service.id]?.checked || false;
+                const savedUrl = savedData[service.id]?.url || '';
+                
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.innerHTML = `
+                    <div class="service-header">
+                        <input type="checkbox" id="${service.id}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
+                        <label for="${service.id}" class="service-title">${service.name}</label>
+                        <span class="service-price ${service.price === 'Free' ? 'free' : ''}">${service.price}</span>
+                    </div>
+                    <div class="service-description">${service.description}</div>
+                    <div class="service-url">
+                        <input type="text" 
+                               id="${service.id}_url" 
+                               placeholder="Your ${service.name} URL" 
+                               value="${savedUrl}"
+                               onchange="updateProgress()">
+                    </div>
+                    <a href="${service.setupUrl}" target="_blank" class="service-button">
+                        Setup ${service.name} →
+                    </a>
+                `;
+                servicesDiv.appendChild(card);
+            });
+            
+            updateProgress();
+        }
+        
+        function updateProgress() {
+            const total = services.length;
+            const checked = services.filter(s => document.getElementById(s.id)?.checked).length;
+            const percentage = Math.round((checked / total) * 100);
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+            
+            updateBookmarks();
+            scheduleSave();
+        }
+        
+        function updateBookmarks() {
+            const bookmarkList = document.getElementById('bookmarkList');
+            const bookmarks = [];
+            
+            services.forEach(service => {
+                const checkbox = document.getElementById(service.id);
+                const urlInput = document.getElementById(`${service.id}_url`);
+                
+                if (checkbox?.checked) {
+                    const url = urlInput?.value || service.defaultUrl;
+                    bookmarks.push(`
+                        <div class="bookmark-item">
+                            <strong>${service.name}:</strong> 
+                            <a href="${url}" target="_blank">${url}</a>
+                        </div>
+                    `);
+                }
+            });
+            
+            if (bookmarks.length > 0) {
+                bookmarkList.innerHTML = bookmarks.join('');
+            } else {
+                bookmarkList.innerHTML = '<p style="color: #999;">Complete services above to see your links here</p>';
+            }
+        }
+        
+        function scheduleSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveData();
+            }, 1000);
+        }
+        
+        function saveData() {
+            const data = {
+                code: currentClient,
+                services: {}
+            };
+            
+            services.forEach(service => {
+                const checkbox = document.getElementById(service.id);
+                const urlInput = document.getElementById(`${service.id}_url`);
+                
+                data.services[service.id] = {
+                    checked: checkbox?.checked || false,
+                    url: urlInput?.value || ''
+                };
+            });
+            
+            // For testing - shows save status
+            showSaveStatus();
+            
+            /* Uncomment this when you have your Google Apps Script URL
+            fetch(`${SCRIPT_URL}`, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                showSaveStatus();
+            })
+            .catch(error => {
+                console.error('Error saving:', error);
+                showError('appError', 'Could not save changes. Please try again.');
+            });
+            */
+        }
+        
+        function showSaveStatus() {
+            const status = document.getElementById('saveStatus');
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 2000);
+        }
+        
+        function showError(elementId, message) {
+            const errorDiv = document.getElementById(elementId);
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Allow Enter key to login
+        document.getElementById('accessCode')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
+</body>
+</html>
