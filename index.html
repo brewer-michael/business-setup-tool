@@ -307,7 +307,7 @@
     
     <script>
         // Configuration - UPDATE THIS with your Google Apps Script URL
-        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHXwizlBO8S46Ib2v0iGivVYHeu9j9G-cT9cw70T2eU4Wat-WI4KFrbFl_9_AaThHl/exec';
         
         let currentClient = null;
         let autoSaveTimer = null;
@@ -376,12 +376,12 @@
             document.getElementById('services').innerHTML = '';
             
             // For testing without backend - remove this when you add the Google Apps Script
-            setTimeout(() => {
+            /*setTimeout(() => {
                 initializeServices();
                 document.getElementById('loading').style.display = 'none';
-            }, 500);
+            }, 500);*/
             
-            /* Uncomment this when you have your Google Apps Script URL
+            /* Uncomment this when you have your Google Apps Script URL */
             fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`)
                 .then(response => response.json())
                 .then(data => {
@@ -393,7 +393,7 @@
                     initializeServices();
                     document.getElementById('loading').style.display = 'none';
                 });
-            */
+            
         }
         
         function initializeServices(savedData = {}) {
@@ -495,7 +495,7 @@
             // For testing - shows save status
             showSaveStatus();
             
-            /* Uncomment this when you have your Google Apps Script URL
+            /* Uncomment this when you have your Google Apps Script URL */
             fetch(`${SCRIPT_URL}`, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -511,7 +511,7 @@
                 console.error('Error saving:', error);
                 showError('appError', 'Could not save changes. Please try again.');
             });
-            */
+            
         }
         
         function showSaveStatus() {
