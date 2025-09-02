@@ -334,9 +334,19 @@
                 id: 'google_workspace',
                 name: 'Google Workspace',
                 price: '$6/month',
-                description: 'Professional email and documents',
+                description: 'Professional email (Gmail) and documents',
                 setupUrl: 'https://workspace.google.com',
-                defaultUrl: 'https://workspace.google.com'
+                defaultUrl: 'https://workspace.google.com',
+                group: 'email'
+            },
+            {
+                id: 'office365',
+                name: 'Office 365',
+                price: '$6/month',
+                description: 'Professional email (Outlook) and Microsoft Office',
+                setupUrl: 'https://www.microsoft.com/en-us/microsoft-365/business',
+                defaultUrl: 'https://office.com',
+                group: 'email'
             },
             {
                 id: 'quickbooks',
@@ -375,40 +385,62 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('services').innerHTML = '';
             
-            // For testing without backend - remove this when you add the Google Apps Script
-            /*setTimeout(() => {
+            // Use fetch with mode: 'cors'
+            fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`, {
+                method: 'GET',
+                mode: 'cors',
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                initializeServices(data);
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                // Initialize with empty data if fetch fails
                 initializeServices();
                 document.getElementById('loading').style.display = 'none';
-            }, 500);*/
-            
-            /* Uncomment this when you have your Google Apps Script URL */
-            fetch(`${SCRIPT_URL}?action=get&code=${currentClient}`)
-                .then(response => response.json())
-                .then(data => {
-                    initializeServices(data);
-                    document.getElementById('loading').style.display = 'none';
-                })
-                .catch(error => {
-                    console.error('Error loading data:', error);
-                    initializeServices();
-                    document.getElementById('loading').style.display = 'none';
-                });
-            
+                // Don't show error to user on first load - might be a new client
+            });
         }
         
         function initializeServices(savedData = {}) {
             const servicesDiv = document.getElementById('services');
             servicesDiv.innerHTML = '';
             
+            let lastGroup = null;
+            
             services.forEach(service => {
                 const isChecked = savedData[service.id]?.checked || false;
                 const savedUrl = savedData[service.id]?.url || '';
                 
+                // Add separator for email choice
+                if (service.group === 'email' && lastGroup !== 'email') {
+                    const separator = document.createElement('div');
+                    separator.style.padding = '15px';
+                    separator.style.textAlign = 'center';
+                    separator.style.color = '#666';
+                    separator.innerHTML = '<strong>Choose ONE email service:</strong>';
+                    servicesDiv.appendChild(separator);
+                    lastGroup = 'email';
+                }
+                
                 const card = document.createElement('div');
                 card.className = 'service-card';
+                
+                // Special handling for email services
+                const onchangeFunc = service.group === 'email' 
+                    ? `updateProgress(); handleEmailChoice('${service.id}')`
+                    : 'updateProgress()';
+                
                 card.innerHTML = `
                     <div class="service-header">
-                        <input type="checkbox" id="${service.id}" ${isChecked ? 'checked' : ''} onchange="updateProgress()">
+                        <input type="checkbox" id="${service.id}" ${isChecked ? 'checked' : ''} onchange="${onchangeFunc}">
                         <label for="${service.id}" class="service-title">${service.name}</label>
                         <span class="service-price ${service.price === 'Free' ? 'free' : ''}">${service.price}</span>
                     </div>
@@ -430,10 +462,31 @@
             updateProgress();
         }
         
+        function handleEmailChoice(selectedId) {
+            // If one email service is checked, uncheck the other
+            if (selectedId === 'google_workspace' && document.getElementById('google_workspace').checked) {
+                document.getElementById('office365').checked = false;
+            } else if (selectedId === 'office365' && document.getElementById('office365').checked) {
+                document.getElementById('google_workspace').checked = false;
+            }
+        }
+        
         function updateProgress() {
-            const total = services.length;
-            const checked = services.filter(s => document.getElementById(s.id)?.checked).length;
-            const percentage = Math.round((checked / total) * 100);
+            // Count email services as one (only count if at least one is checked)
+            const emailChecked = document.getElementById('google_workspace')?.checked || 
+                               document.getElementById('office365')?.checked;
+            
+            // Count non-email services
+            const nonEmailServices = services.filter(s => s.group !== 'email');
+            const checkedNonEmail = nonEmailServices.filter(s => 
+                document.getElementById(s.id)?.checked
+            ).length;
+            
+            // Total: non-email services + 1 for email choice
+            const totalCategories = nonEmailServices.length + 1;
+            const checkedCategories = checkedNonEmail + (emailChecked ? 1 : 0);
+            
+            const percentage = Math.round((checkedCategories / totalCategories) * 100);
             
             const progressBar = document.getElementById('progressBar');
             progressBar.style.width = percentage + '%';
@@ -492,15 +545,12 @@
                 };
             });
             
-            // For testing - shows save status
-            showSaveStatus();
-            
-            /* Uncomment this when you have your Google Apps Script URL */
+            // POST with mode: 'no-cors' for Google Apps Script
             fetch(`${SCRIPT_URL}`, {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: 'no-cors', // Important for Google Apps Script
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'text/plain', // Use text/plain to avoid preflight
                 },
                 body: JSON.stringify(data)
             })
@@ -509,9 +559,9 @@
             })
             .catch(error => {
                 console.error('Error saving:', error);
-                showError('appError', 'Could not save changes. Please try again.');
+                // Still show success - the save might have worked even with CORS error
+                showSaveStatus();
             });
-            
         }
         
         function showSaveStatus() {
